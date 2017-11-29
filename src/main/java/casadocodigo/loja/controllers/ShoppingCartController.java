@@ -59,8 +59,6 @@ public class ShoppingCartController {
 	public String list(){
 		return "shoppingCart/items";
 	}
-	
-
 
 	public ProductDao getProductDao() {
 		return productDao;
