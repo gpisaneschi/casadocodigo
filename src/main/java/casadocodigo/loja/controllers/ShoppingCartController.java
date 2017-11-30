@@ -1,6 +1,7 @@
 package casadocodigo.loja.controllers;
 
 import java.math.BigDecimal;
+import java.util.concurrent.Callable;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -41,33 +42,35 @@ public class ShoppingCartController {
 		return item;
 	}
 	@RequestMapping(method=RequestMethod.POST, value="/checkout")
-	public String checkout(){
-		BigDecimal total = shoppingCard.getTotal();
-		
-		String uriToPay = "http://book-payment.herokuapp.com/payment";
-		try {
-			String response = restTemplate.postForObject(uriToPay, new PaymentData(total), String.class);
-			System.out.println(response);
-			return "redirect:/products";
-		} catch (HttpClientErrorException exception) {
-			System.out.println("Ocorreu um erro ao criar o pagamento: " +exception.getMessage());
-			return "redirect:/shopping";
-		}
+	public Callable<String> checkout(){
+		return () -> {
+			BigDecimal total = shoppingCard.getTotal();
+			
+			String uriToPay = "http://book-payment.herokuapp.com/payment";
+			try {
+				String response = restTemplate.postForObject(uriToPay, new PaymentData(total), String.class);
+				System.out.println(response);
+				return "redirect:/products";
+			} catch (HttpClientErrorException exception) {
+				System.out.println("Ocorreu um erro ao criar o pagamento: " +exception.getMessage());
+				return "redirect:/shopping";
+			}
+		};
 	}
 	
 	@RequestMapping(method=RequestMethod.GET)
 	public String list(){
 		return "shoppingCart/items";
 	}
-
+	
 	public ProductDao getProductDao() {
 		return productDao;
 	}
-
+	
 	public void setProductDao(ProductDao productDao) {
 		this.productDao = productDao;
 	}
-
+	
 	public ShoppingCart getShoppingCard() {
 		return shoppingCard;
 	}
@@ -75,15 +78,11 @@ public class ShoppingCartController {
 	public void setShoppingCard(ShoppingCart shoppingCard) {
 		this.shoppingCard = shoppingCard;
 	}
-
-
-
+	
 	public RestTemplate getRestTemplate() {
 		return restTemplate;
 	}
-
-
-
+	
 	public void setRestTemplate(RestTemplate restTemplate) {
 		this.restTemplate = restTemplate;
 	}

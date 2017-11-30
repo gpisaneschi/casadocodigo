@@ -1,6 +1,8 @@
 package casadocodigo.loja.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
@@ -53,6 +55,7 @@ public class ProductsController {
 	}
 	
 	@Transactional
+	@CacheEvict(value="lastProducts")
 	@RequestMapping(method=RequestMethod.POST)
 	public ModelAndView save(MultipartFile summary, @Valid Product product, BindingResult bindingResult, RedirectAttributes attributes){
 		//System.out.println("Cadastrando o produto: " + product);
@@ -74,6 +77,7 @@ public class ProductsController {
 	}
 	
 	@RequestMapping(method=RequestMethod.GET)
+	@Cacheable(value="lastProducts")
 	public ModelAndView list(){
 		ModelAndView modelAndView = new ModelAndView("/products/list");
 		modelAndView.addObject("products", productDAO.list());
