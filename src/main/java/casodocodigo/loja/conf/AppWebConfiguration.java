@@ -24,10 +24,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.i18n.CookieLocaleResolver;
+import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
@@ -72,6 +76,7 @@ public class AppWebConfiguration extends WebMvcConfigurerAdapter{
 			ReloadableResourceBundleMessageSource bundle = new ReloadableResourceBundleMessageSource();
 			bundle.setBasename("/WEB-INF/messages");
 			bundle.setDefaultEncoding("UTF-8");
+			bundle.setFallbackToSystemLocale(true);
 			bundle.setCacheSeconds(1);
 			return bundle;
 		}
@@ -87,11 +92,21 @@ public class AppWebConfiguration extends WebMvcConfigurerAdapter{
 		}
 		
 		@Bean
-		public CacheManager cacheManager(){
+		public CacheManager cacheManasger(){
 			CacheBuilder<Object, Object> builder = CacheBuilder.newBuilder().maximumSize(100).expireAfterAccess(1, TimeUnit.MINUTES);
 			GuavaCacheManager cacheManager = new GuavaCacheManager();
 			cacheManager.setCacheBuilder(builder);
 			return cacheManager;
+		}
+		
+		@Override
+		public void addInterceptors(InterceptorRegistry registry) {
+			registry.addInterceptor(new LocaleChangeInterceptor());
+		}
+		
+		@Bean
+		public LocaleResolver localeResolver(){
+			return new CookieLocaleResolver();
 		}
 		
 		@Bean
